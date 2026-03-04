@@ -22,5 +22,5 @@ Ultimately, the "end result" of this code is the number of Franklin-8 circles.
 I extended this code to enumerate all Franklin (16)-circles, however this version is not included because the code requires minor changes but is otherwise entirely repetitive.
 
 The "Matrix Code" file contains the code for the second goal, and the "Equations" file contains the equations expressed in the matrices.
-This code generates a 356x256 matrix that could be used to find the basis of a Franklin Circle.
+This code generates a 376x256 matrix that could be used to find the basis of a Franklin Circle.
 Each row is an equation that expresses a different condition of a Franklin (16)-Circle.
