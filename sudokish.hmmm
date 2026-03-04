@@ -1,0 +1,285 @@
+### MAIN FUNCTION
+
+# read in all the board values and store in memory cells 245-244
+0 setn r15 127
+1 addn r15 127
+2 setn r2 0
+3 setn r3 9
+# :loadloop:
+4 read r1
+5 addn r2 1
+6 storer r1 r15
+7 addn r15 -1
+8 mod r4 r2 r3
+9 jnezn r4 4 # :loadloop:
+
+# set r1 to be a "board pointer"
+10 setn r1 127
+11 addn r1 127
+
+# set r15 to 255
+12 addn r15 10
+
+#set r12 to be right above board memory
+13 copy r12 r15
+14 addn r12 -10
+
+# set the first integer for fill and call the function
+15 setn r13 0
+16 calln r14 29 # :fillstackframe:
+17 setn r4 9
+18 addn r2 -1
+19 jnezn r2 26 # :mainelse:
+# :printloop:
+20 loadr r3 r1
+21 write r3
+22 addn r1 -1
+23 addn r4 -1
+24 jnezn r4 20 # :printloop:
+25 halt
+
+# :mainelse:
+26 setn r3 -1
+27 write r3
+
+28 halt
+
+# :fillstackframe:
+### MAKES STACK FRAME FOR FILL
+#IN: R15: memory location for bottom of caller's stack frame
+#IN: R14: instruction to jump to after method has been completed
+#IN: R13: the integer to compare to
+#IN: R12: memory location to start the callee's stack frame
+#OUT: R15: memory location for the bottom of the stack frame
+
+# load sbp and set r15 to the location of the sbp
+29 storer r15 r12
+30 copy r15 r12
+
+# load instruction pointer
+31 addn r15 -1
+32 storer r14 r15
+33 addn r15 1
+
+# load integer
+34 addn r15 -2
+35 storer r13 r15
+36 addn r15 2
+
+37 jumpn 38 # :fillbody:
+
+
+# :fillbody:
+### FILL FUNCTION BODY
+#OUT: R2: return value
+
+# check if the integer value is greater than 8
+# if it is jump to that part
+38 addn r15 -2
+39 loadr r13 r15
+40 addn r15 2
+41 copy r9 r13
+42 addn r9 -8
+43 jgtzn r9 99 # :greaterthan8:
+
+# check if board[i] == 0
+44 sub r1 r1 r13
+45 loadr r5 r1
+46 add r1 r1 r13
+47 jnezn r5 94 # :neq0:
+
+# (b+i) = 1
+48 sub r1 r1 r13
+49 setn r5 1
+50 storer r5 r1
+51 add r1 r1 r13
+
+# first fill check 
+52 calln r14 90 # :prepreg:
+53 addn r15 -2
+54 loadr r13 r15
+55 addn r15 2
+56 addn r2 -1
+57 jnezn r2 60 # :firstfillcheck:
+58 setn r2 1
+59 jumpn 101 # :returnfromfunc:
+
+# :firstfillcheck:
+# (b+i) = 2
+60 sub r1 r1 r13
+61 setn r5 2
+62 storer r5 r1
+63 add r1 r1 r13
+
+# first fill check 
+64 calln r14 90 # :prepreg:
+65 addn r15 -2
+66 loadr r13 r15
+67 addn r15 2
+68 addn r2 -1
+69 jnezn r2 72 # :secondfillcheck:
+70 setn r2 1
+71 jumpn 101 # :returnfromfunc:
+
+# :secondfillcheck:
+# (b+i) = 4
+72 sub r1 r1 r13
+73 setn r5 4
+74 storer r5 r1
+75 add r1 r1 r13
+
+# first fill check 
+76 calln r14 90 # :prepreg:
+77 addn r15 -2
+78 loadr r13 r15
+79 addn r15 2
+80 addn r2 -1
+81 jnezn r2 84 # :thirdfillcheck:
+82 setn r2 1
+83 jumpn 101 # :returnfromfunc:
+
+# :thirdfillcheck:
+# (b+i) = 0
+84 sub r1 r1 r13
+85 setn r5 0
+86 storer r5 r1
+87 add r1 r1 r13
+88 setn r2 0
+89 jumpn 101 # :returnfromfunc:
+
+# :prepreg:
+90 addn r13 1
+91 copy r12 r15
+92 addn r12 -3
+93 jumpn 29 # :fillstackframe:
+
+# :neq0:
+# return the value of fill(b, i+1)
+94 addn r13 1
+95 copy r12 r15
+96 addn r12 -3
+97 calln r14 29 # :fillstackframe:
+98 jumpn 101 # :returnfromfunc:
+
+# :greaterthan8:
+# execute the board check and return the value
+99 calln r10 109 # :checkboard:
+100 jumpn 101 # :returnfromfunc:
+
+
+# :returnfromfunc:
+# load instruction pointer
+101 addn r15 -1
+102 loadr r14 r15
+103 addn r15 1
+# load new stack base
+104 loadr r15 r15
+#load integer value
+105 addn r15 -2
+106 loadr r13 r15
+107 addn r15 2
+# jump to instruction
+108 jumpr r14
+
+
+# :checkboard:
+### CHECK BOARD SUBROUTINE
+#IN: R1: board pointer
+#IN: R10: instruction to jump to after check
+#OUT: R1: board pointer
+#OUT: R2: return value
+
+# store first row in r3
+109 loadr r3 r1
+110 addn r1 -1
+111 loadr r4 r1
+112 add r3 r3 r4
+113 addn r1 -1
+114 loadr r4 r1
+115 add r3 r3 r4
+
+# store second row in r4
+116 addn r1 -1
+117 loadr r4 r1
+118 addn r1 -1
+119 loadr r5 r1
+120 add r4 r4 r5
+121 addn r1 -1
+122 loadr r5 r1
+123 add r4 r4 r5
+
+
+# store third row in r5
+124 addn r1 -1
+125 loadr r5 r1
+126 addn r1 -1
+127 loadr r6 r1
+128 add r5 r5 r6
+129 addn r1 -1
+130 loadr r6 r1
+131 add r5 r5 r6
+
+# reset board pointer
+132 addn r1 8
+
+# store first column in r6
+133 loadr r6 r1
+134 addn r1 -3
+135 loadr r7 r1
+136 add r6 r6 r7
+137 addn r1 -3
+138 loadr r7 r1
+139 add r6 r6 r7
+
+
+# reset board pointer
+140 addn r1 6
+
+# store second column in r7
+141 addn r1 -1
+142 loadr r7 r1
+143 addn r1 -3
+144 loadr r8 r1
+145 add r7 r7 r8
+146 addn r1 -3
+147 loadr r8 r1
+148 add r7 r7 r8
+
+
+# reset board pointer
+149 addn r1 7
+
+# store third column in r8
+150 addn r1 -2
+151 loadr r8 r1
+152 addn r1 -3
+153 loadr r9 r1
+154 add r8 r8 r9
+155 addn r1 -3
+156 loadr r9 r1
+157 add r8 r8 r9
+
+# reset board pointer
+158 addn r1 8
+
+# offset each column
+159 addn r3 -7
+160 addn r4 -7
+161 addn r5 -7
+162 addn r6 -7
+163 addn r7 -7
+164 addn r8 -7
+
+# jump to "else" branch if they are not 0
+165 jnezn r3 173 # :checkelse:
+166 jnezn r4 173 # :checkelse:
+167 jnezn r5 173 # :checkelse:
+168 jnezn r6 173 # :checkelse:
+169 jnezn r7 173 # :checkelse:
+170 jnezn r8 173 # :checkelse:
+171 setn r2 1
+172 jumpr r10
+
+# :checkelse:
+173 setn r2 0
+174 jumpr r10
